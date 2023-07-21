@@ -117,11 +117,13 @@ export const tuple = <T extends readonly Cast<unknown>[]>(schema: T) =>
     };
   });
 
+/*
 export const set = <T>(castItem: Cast<T>) =>
   instance(Set).map((set) => new Set<T>([...set].map(castItem)));
 export const map = <K, V>(castKey: Cast<K>, castValue: Cast<V>) =>
   instance(Map).map((map) => {
     return new Map<K, V>([...map].map(([k, v]) => [castKey(k), castValue(v)]));
   });
+*/
 
 export const lazy = <T>(cast: () => Cast<T>) => banditype((raw) => cast()(raw));
