@@ -1,121 +1,136 @@
-type Simplify<T> = T extends Object ? { [K in keyof T]: T[K] } : T;
+type Simplify<T> = T extends Object ? { [K in keyof T]: T[K] } : T
 type WithOptionalProps<T> = Simplify<
-  Partial<T> &
-    Pick<
-      T,
-      {
-        [K in keyof T]: T[K] extends Exclude<T[K], undefined> ? K : never;
-      }[keyof T]
-    >
->;
+    Partial<T> &
+        Pick<
+            T,
+            {
+                [K in keyof T]: T[K] extends Exclude<T[K], undefined>
+                    ? K
+                    : never
+            }[keyof T]
+        >
+>
 
-export type Cast<T, Source = unknown> = (data: Source) => T;
-export type Infer<Schema extends Cast<unknown>> = ReturnType<Schema>;
+export type Cast<T, Source = unknown> = (data: Source) => T
+export type Infer<Schema extends Cast<unknown>> = ReturnType<Schema>
 // Chainable API
 export interface Banditype<T> extends Cast<T> {
-  map: <E>(extra: Cast<E, T>) => Banditype<E>;
-  or: <E>(extra: Cast<E>) => Banditype<E | T>;
+    map: <E>(extra: Cast<E, T>) => Banditype<E>
+    or: <E>(extra: Cast<E>) => Banditype<E | T>
 }
 
 // Core
 export const banditype = <T>(cast: Cast<T>): Banditype<T> => {
-  (cast as Banditype<T>).map = (extra) => banditype((raw) => extra(cast(raw)));
-  (cast as Banditype<T>).or = (extra) =>
-    banditype((raw) => {
-      try {
-        return cast(raw);
-      } catch (err) {
-        return extra(raw);
-      }
-    });
-  return cast as Banditype<T>;
-};
+    ;(cast as Banditype<T>).map = extra => banditype(raw => extra(cast(raw)))
+    ;(cast as Banditype<T>).or = extra =>
+        banditype(raw => {
+            try {
+                return cast(raw)
+            } catch (err) {
+                return extra(raw)
+            }
+        })
+    return cast as Banditype<T>
+}
 
 // Error helper
-export const fail = () => ("bad banditype" as any)() as never;
+export const fail = (msg: string) =>
+    (("fail banditype " + msg) as any)() as never
 
-export const never = () => banditype(() => fail());
-export const unknown = () => banditype((raw) => raw);
+export const never = () => banditype(() => fail("never"))
+export const unknown = () => banditype(raw => raw)
 
 // literals
 // not sure why, but this signature prevents wideing [90] -> number[]
-type Primitive = string | number | null | undefined | boolean | symbol | object;
+type Primitive = string | number | null | undefined | boolean | symbol | object
 export const enums = <U extends Primitive, T extends readonly U[]>(items: T) =>
-  banditype((raw) =>
-    items.includes(raw as T[number]) ? (raw as T[number]) : fail()
-  );
+    banditype(raw =>
+        items.includes(raw as T[number]) ? (raw as T[number]) : fail("enum")
+    )
 
 // Basic types
-type Func = (...args: unknown[]) => unknown;
+type Func = (...args: unknown[]) => unknown
 export interface Like {
-  (tag: string): Banditype<string>;
-  (tag: number): Banditype<number>;
-  (tag: boolean): Banditype<boolean>;
-  (tag: bigint): Banditype<bigint>;
-  (tag: Func): Banditype<Func>;
-  (tag: symbol): Banditype<symbol>;
-  (): Banditype<undefined>;
+    (tag: string): Banditype<string>
+    (tag: number): Banditype<number>
+    (tag: boolean): Banditype<boolean>
+    (tag: bigint): Banditype<bigint>
+    (tag: Func): Banditype<Func>
+    (tag: symbol): Banditype<symbol>
+    (): Banditype<undefined>
 }
 export const like = ((tag: unknown) =>
-  banditype((raw) => (typeof raw === typeof tag ? raw : fail()))) as Like;
-export const string = () => like("");
-export const number = () => like(0);
-export const boolean = () => like(true);
-export const func = () => like(fail);
-export const optional = () => like();
-export const nullable = () => banditype((raw) => (raw === null ? raw : fail()));
+    banditype(raw => (typeof raw === typeof tag ? raw : fail("like")))) as Like
+export const string = () => like("")
+export const number = () => like(0)
+export const boolean = () => like(true)
+export const func = () => like(never)
+export const optional = () => like()
+export const nullable = () =>
+    banditype(raw => (raw === null ? raw : fail("nullable")))
 
 // Classes
 export const instance = <T>(proto: new (...args: unknown[]) => T) =>
-  banditype((raw) => (raw instanceof proto ? (raw as T) : fail()));
+    banditype(raw =>
+        raw instanceof proto
+            ? (raw as T)
+            : fail(
+                  "instance " +
+                      (raw instanceof proto ? "yes" : "no") +
+                      ", " +
+                      typeof proto +
+                      ", " +
+                      typeof raw
+              )
+    )
 
 // objects
 export const record = <Item>(
-  castValue: Cast<Item>
+    castValue: Cast<Item>
 ): Banditype<Record<string, Item>> =>
-  instance(Object).map((raw: any) => {
-    const res: Record<string, Item> = {};
-    for (const key in raw) {
-      const f = castValue(raw[key]);
-      f !== undefined && (res[key] = f);
-    }
-    return res;
-  });
+    instance(Object).map((raw: any) => {
+        const res: Record<string, Item> = {}
+        for (const key in raw) {
+            const f = castValue(raw[key])
+            f !== undefined && (res[key] = f)
+        }
+        return res
+    })
 
 export const object = <T = Record<string, never>>(schema: {
-  [K in keyof T]-?: Cast<T[K]>;
+    [K in keyof T]-?: Cast<T[K]>
 }) =>
-  instance(Object).map((raw: any) => {
-    const res = {} as T;
-    for (const key in schema) {
-      const f = schema[key](raw[key]);
-      f !== undefined && (res[key] = f);
-    }
-    return res as WithOptionalProps<T>;
-  });
+    instance(Object).map((raw: any) => {
+        const res = {} as T
+        for (const key in schema) {
+            const f = schema[key](raw[key])
+            f !== undefined && (res[key] = f)
+        }
+        return res as WithOptionalProps<T>
+    })
 export const objectLoose = <
-  T extends Record<string, unknown> = Record<string, never>
+    T extends Record<string, unknown> = Record<string, never>
 >(schema: {
-  [K in keyof T]-?: Cast<T[K]>;
+    [K in keyof T]-?: Cast<T[K]>
 }) =>
-  instance(Object).map((raw: any) => {
-    const res = { ...raw };
-    for (const key in schema) {
-      const f = schema[key](raw[key]);
-      f !== undefined && (res[key] = f);
-    }
-    return res as WithOptionalProps<T>;
-  });
+    instance(Object).map((raw: any) => {
+        const res = { ...raw }
+        for (const key in schema) {
+            const f = schema[key](raw[key])
+            f !== undefined && (res[key] = f)
+        }
+        return res as WithOptionalProps<T>
+    })
 
 // arrays
 export const array = <Item>(castItem: Cast<Item>) =>
-  instance(Array).map((arr) => arr.map(castItem));
+    instance(Array).map(arr => arr.map(castItem))
 export const tuple = <T extends readonly Cast<unknown>[]>(schema: T) =>
-  instance(Array).map((arr) => {
-    return schema.map((cast, i) => cast(arr[i])) as {
-      -readonly [K in keyof T]: Infer<T[K]>;
-    };
-  });
+    instance(Array).map(arr => {
+        return schema.map((cast, i) => cast(arr[i])) as {
+            -readonly [K in keyof T]: Infer<T[K]>
+        }
+    })
 
 /*
 export const set = <T>(castItem: Cast<T>) =>
@@ -126,4 +141,4 @@ export const map = <K, V>(castKey: Cast<K>, castValue: Cast<V>) =>
   });
 */
 
-export const lazy = <T>(cast: () => Cast<T>) => banditype((raw) => cast()(raw));
+export const lazy = <T>(cast: () => Cast<T>) => banditype(raw => cast()(raw))

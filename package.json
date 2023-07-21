@@ -1,71 +1,72 @@
 {
-  "name": "banditypes",
-  "version": "0.2.5",
-  "description": "The might 400-byte schema validator",
-  "author": "Vladimir Klepov v.klepov@gmail.com",
-  "license": "MIT",
-  "type": "module",
-  "sideEffects": false,
-  "module": "./dist/index.js",
-  "main": "./dist/cjs/index.cjs",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/cjs/index.cjs"
-    }
-  },
-  "types": "./dist/index.d.ts",
-  "engines": {
-    "node": "^14 || ^16 || >=18"
-  },
-  "scripts": {
-    "test:types": "tsc && tsc -p tests/tsconfig.dts.json --noEmit",
-    "test:runtime": "rm -f dist/tests/**/*.{ts,js} && tsc -p tests/tsconfig.json && uvu dist/tests '.test.js$'",
-    "test": "npm run test:types && npm run test:runtime",
-    "test:coverage": "c8 --100 --exclude dist/tests npm test",
-    "lint:all": "prettier --check --loglevel warn .",
-    "format": "prettier --loglevel silent --write",
-    "format:all": "npm run format -- .",
-    "format:staged": "npx nano-staged",
-    "size": "node bench/run",
-    "build:cjs": "tsc -p tsconfig.cjs.json && mv dist/cjs/index.js dist/cjs/index.cjs",
-    "build": "rm -rf dist && tsc && npm run build:cjs"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thoughtspile/banditypes.git"
-  },
-  "keywords": [
-    "typescript",
-    "superstruct",
-    "schema",
-    "validation",
-    "zod"
-  ],
-  "bugs": {
-    "url": "https://github.com/thoughtspile/banditypes/issues"
-  },
-  "homepage": "https://github.com/thoughtspile/banditypes#readme",
-  "devDependencies": {
-    "@types/node": "^18.14.1",
-    "c8": "^7.13.0",
-    "esbuild": "^0.17.10",
-    "expect-type": "^0.15.0",
-    "nano-staged": "^0.8.0",
-    "pre-commit": "^1.2.2",
-    "prettier": "^2.8.4",
-    "superstruct": "^1.0.3",
-    "terser": "^5.16.4",
-    "typed": "^4.1.2",
-    "typescript": "^4.9.5",
-    "uvu": "^0.5.6",
-    "zod": "^3.20.6"
-  },
-  "nano-staged": {
-    "*": "prettier --loglevel silent --write"
-  },
-  "precommit": [
-    "format:staged",
-    "test:coverage"
-  ]
+    "name": "banditypes",
+    "version": "0.2.5",
+    "description": "The might 400-byte schema validator",
+    "author": "Vladimir Klepov v.klepov@gmail.com",
+    "license": "MIT",
+    "type": "module",
+    "sideEffects": false,
+    "module": "./dist/index.js",
+    "main": "./dist/cjs/index.cjs",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/cjs/index.cjs"
+        }
+    },
+    "types": "./dist/index.d.ts",
+    "engines": {
+        "node": "^14 || ^16 || >=18"
+    },
+    "scripts": {
+        "test:types": "tsc && tsc -p tests/tsconfig.dts.json --noEmit",
+        "test:runtime": "rm -f dist/tests/**/*.{ts,js} && tsc -p tests/tsconfig.json && uvu dist/tests '.test.js$'",
+        "test": "npm run test:types && npm run test:runtime",
+        "test:coverage": "c8 --100 --exclude dist/tests npm test",
+        "lint:all": "prettier --check --loglevel warn .",
+        "format": "prettier --loglevel silent --write",
+        "format:all": "npm run format -- .",
+        "format:staged": "npx nano-staged",
+        "size": "node bench/run",
+        "build:cjs": "tsc -p tsconfig.cjs.json && mv dist/cjs/index.js dist/cjs/index.cjs",
+        "build": "rm -rf dist && tsc && npm run build:cjs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thoughtspile/banditypes.git"
+    },
+    "keywords": [
+        "typescript",
+        "superstruct",
+        "schema",
+        "validation",
+        "zod"
+    ],
+    "bugs": {
+        "url": "https://github.com/thoughtspile/banditypes/issues"
+    },
+    "homepage": "https://github.com/thoughtspile/banditypes#readme",
+    "devDependencies": {
+        "@types/node": "^18.14.1",
+        "c8": "^7.13.0",
+        "esbuild": "^0.17.10",
+        "expect-type": "^0.15.0",
+        "nano-staged": "^0.8.0",
+        "pre-commit": "^1.2.2",
+        "prettier": "^2.8.4",
+        "superstruct": "^1.0.3",
+        "terser": "^5.16.4",
+        "typed": "^4.1.2",
+        "typescript": "^4.9.5",
+        "uvu": "^0.5.6",
+        "zod": "^3.20.6",
+        "@devicescript/cli": "2.14.6"
+    },
+    "nano-staged": {
+        "*": "prettier --loglevel silent --write"
+    },
+    "precommit": [
+        "format:staged",
+        "test:coverage"
+    ]
 }
