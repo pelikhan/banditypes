@@ -1,5 +1,3 @@
-import * as ds from "@devicescript/core"
-
 class Number {
     static isInteger(v: number): boolean {
         if (isNaN(v)) return false
